@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Pengiraan Stok - JPJ Negeri Pahang</title>
+<style>
+  :root {
+    --navy: #0b2545;
+    --navy-dark: #081a33;
+    --accent: #c8a24a;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --border: #dde3ea;
+    --text: #1e2a3a;
+    --muted: #64748b;
+    --danger: #c0392b;
+    --success: #1e8449;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--navy), var(--navy-dark));
+    color: #fff;
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-bottom: 4px solid var(--accent);
+  }
+
+  header .title-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  header .logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--navy-dark);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+
+  header p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: #cdd9e8;
+  }
+
+  header .tanggal {
+    font-size: 13px;
+    color: #cdd9e8;
+    text-align: right;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 0 20px 40px;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .toolbar input[type="text"] {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 260px;
+    font-size: 14px;
+  }
+
+  .btn {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.15s ease;
+  }
+
+  .btn:hover { opacity: 0.88; }
+
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-accent { background: var(--accent); color: var(--navy-dark); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 5px 10px; font-size: 13px; }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .summary .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .summary .card span.label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .summary .card span.value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .summary .card.alert span.value { color: var(--danger); }
+
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+  }
+
+  thead th {
+    background: var(--navy);
+    color: #fff;
+    text-align: left;
+    padding: 12px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  tbody tr:hover { background: #f8fafc; }
+
+  tbody input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  tbody input[type="number"] { text-align: right; }
+
+  td.baki {
+    font-weight: 700;
+    text-align: right;
+    color: var(--success);
+  }
+
+  td.baki.rendah { color: var(--danger); }
+
+  td.aksi { text-align: center; white-space: nowrap; }
+
+  tfoot td {
+    padding: 12px 10px;
+    font-weight: 700;
+    background: #eef2f7;
+    border-top: 2px solid var(--border);
+  }
+
+  footer {
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 700px) {
+    .summary { grid-template-columns: repeat(2, 1fr); }
+    header { flex-direction: column; align-items: flex-start; }
+    header .tanggal { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <div class="logo">JPJ</div>
+    <div>
+      <h1>Sistem Pengiraan Stok</h1>
+      <p>Jabatan Pengangkutan Jalan Negeri Pahang</p>
+    </div>
+  </div>
+  <div class="tanggal" id="tarikhSemasa"></div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <input type="text" id="carian" placeholder="Cari nama item stok...">
+    <div>
+      <button class="btn btn-accent" onclick="tambahBaris()">+ Tambah Item</button>
+      <button class="btn btn-primary" onclick="cetak()">Cetak Laporan</button>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="card">
+      <span class="label">Jumlah Jenis Item</span>
+      <span class="value" id="jumlahItem">0</span>
+    </div>
+    <div class="card">
+      <span class="label">Jumlah Stok Masuk</span>
+      <span class="value" id="jumlahMasuk">0</span>
+    </div>
+    <div class="card">
+      <span class="label">Jumlah Stok Keluar</span>
+      <span class="value" id="jumlahKeluar">0</span>
+    </div>
+    <div class="card alert">
+      <span class="label">Baki Stok Rendah (&lt;10)</span>
+      <span class="value" id="jumlahRendah">0</span>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="jadualStok">
+      <thead>
+        <tr>
+          <th style="width:28px;">#</th>
+          <th>Nama Item</th>
+          <th style="width:100px;">Stok Awal</th>
+          <th style="width:100px;">Masuk</th>
+          <th style="width:100px;">Keluar</th>
+          <th style="width:100px;">Baki</th>
+          <th style="width:70px;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="badanJadual">
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2">JUMLAH KESELURUHAN</td>
+          <td id="totAwal">0</td>
+          <td id="totMasuk">0</td>
+          <td id="totKeluar">0</td>
+          <td id="totBaki">0</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</main>
+
+<footer>
+  &copy; <span id="tahun"></span> Jabatan Pengangkutan Jalan (JPJ) Negeri Pahang - Sistem Pengiraan Stok Dalaman
+</footer>
+
+<script>
+  let bilanganBaris = 0;
+
+  const dataAwal = [
+    { nama: "Pelekat Cukai Jalan", awal: 500, masuk: 200, keluar: 150 },
+    { nama: "Buku Rekod Pendaftaran", awal: 300, masuk: 100, keluar: 80 },
+    { nama: "Plat Nombor Kenderaan", awal: 150, masuk: 50, keluar: 45 },
+    { nama: "Borang Permohonan Lesen", awal: 800, masuk: 300, keluar: 400 }
+  ];
+
+  function tambahBaris(nama = "", awal = 0, masuk = 0, keluar = 0) {
+    bilanganBaris++;
+    const tbody = document.getElementById("badanJadual");
+    const tr = document.createElement("tr");
+    tr.dataset.id = bilanganBaris;
+    tr.innerHTML = `
+      <td class="noBil">${bilanganBaris}</td>
+      <td><input type="text" class="input-nama" value="${nama}" placeholder="Nama item"></td>
+      <td><input type="number" class="input-awal" value="${awal}" min="0" oninput="kiraSemua()"></td>
+      <td><input type="number" class="input-masuk" value="${masuk}" min="0" oninput="kiraSemua()"></td>
+      <td><input type="number" class="input-keluar" value="${keluar}" min="0" oninput="kiraSemua()"></td>
+      <td class="baki">0</td>
+      <td class="aksi"><button class="btn btn-danger btn-sm" onclick="padamBaris(this)">Padam</button></td>
+    `;
+    tbody.appendChild(tr);
+    kiraSemua();
+  }
+
+  function padamBaris(btn) {
+    const tr = btn.closest("tr");
+    tr.remove();
+    susunSemulaNombor();
+    kiraSemua();
+  }
+
+  function susunSemulaNombor() {
+    const baris = document.querySelectorAll("#badanJadual tr");
+    baris.forEach((tr, i) => {
+      tr.querySelector(".noBil").textContent = i + 1;
+    });
+  }
+
+  function kiraSemua() {
+    const baris = document.querySelectorAll("#badanJadual tr");
+    let totAwal = 0, totMasuk = 0, totKeluar = 0, totBaki = 0, rendah = 0;
+
+    baris.forEach(tr => {
+      const awal = parseFloat(tr.querySelector(".input-awal").value) || 0;
+      const masuk = parseFloat(tr.querySelector(".input-masuk").value) || 0;
+      const keluar = parseFloat(tr.querySelector(".input-keluar").value) || 0;
+      const baki = awal + masuk - keluar;
+
+      const sel = tr.querySelector(".baki");
+      sel.textContent = baki;
+      sel.classList.toggle("rendah", baki < 10);
+      if (baki < 10) rendah++;
+
+      totAwal += awal;
+      totMasuk += masuk;
+      totKeluar += keluar;
+      totBaki += baki;
+    });
+
+    document.getElementById("totAwal").textContent = totAwal;
+    document.getElementById("totMasuk").textContent = totMasuk;
+    document.getElementById("totKeluar").textContent = totKeluar;
+    document.getElementById("totBaki").textContent = totBaki;
+
+    document.getElementById("jumlahItem").textContent = baris.length;
+    document.getElementById("jumlahMasuk").textContent = totMasuk;
+    document.getElementById("jumlahKeluar").textContent = totKeluar;
+    document.getElementById("jumlahRendah").textContent = rendah;
+  }
+
+  function cetak() {
+    window.print();
+  }
+
+  document.getElementById("carian").addEventListener("input", function () {
+    const kata = this.value.toLowerCase();
+    document.querySelectorAll("#badanJadual tr").forEach(tr => {
+      const nama = tr.querySelector(".input-nama").value.toLowerCase();
+      tr.style.display = nama.includes(kata) ? "" : "none";
+    });
+  });
+
+  document.getElementById("tahun").textContent = new Date().getFullYear();
+  document.getElementById("tarikhSemasa").textContent = new Date().toLocaleDateString("ms-MY", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric"
+  });
+
+  dataAwal.forEach(item => tambahBaris(item.nama, item.awal, item.masuk, item.keluar));
+</script>
+
+</body>
+</html>
